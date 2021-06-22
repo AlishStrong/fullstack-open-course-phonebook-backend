@@ -13,3 +13,6 @@ GET {{personUrl}}/string
 ### Get a person by id: 404 
 ### because person not found
 GET {{personUrl}}/10
+
+### Delete a person by id
+DELETE {{personUrl}}/1

@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-const persons = [
+let persons = [
   { 
     'name': 'Arto Hellas', 
     'number': '040-123456',
@@ -52,6 +52,11 @@ app.get(`${personsEndpoint}/:id`, (req, res) => {
   res.status(404).end();
 });
 
+app.delete(`${personsEndpoint}/:id`, (req, res) => {
+  const personId = +req.params.id;
+  persons = persons.filter(p => p.id !== personId);
+  res.status(204).end();
+});
 
 const PORT = 3001;
 app.listen(PORT, () => console.log(`Phonebook backend listens on port ${PORT}`));
