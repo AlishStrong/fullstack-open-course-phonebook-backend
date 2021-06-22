@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const app = express();
 
+app.use(express.static('build'))
 app.use(express.json());
 
 morgan.token('req-body', function getId (req, res) {
@@ -83,6 +84,19 @@ app.get(`${personsEndpoint}/:id`, (req, res) => {
   res.status(404).end();
 });
 
+app.put(`${personsEndpoint}/:id`, (req, res) => {
+  const personId = +req.params.id;
+  if (!!personId) {
+    let person = persons.find(p => p.id === personId);
+    if (person) {
+      person = {...req.body};
+      persons = persons.map(p => p.id === person.id ? person : p);
+      res.json(person);
+    }
+  }
+  res.status(404).end();
+});
+
 app.post(personsEndpoint, (req, res) => {
   const dataCheck = checkData(req.body);
   if (dataCheck.result) {
@@ -105,5 +119,5 @@ app.delete(`${personsEndpoint}/:id`, (req, res) => {
   res.status(204).end();
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Phonebook backend listens on port ${PORT}`));
