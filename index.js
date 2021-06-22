@@ -1,6 +1,10 @@
 const express = require('express');
 const app = express();
 
+app.use(express.json());
+
+const randomId = () => Math.random() * Math.random();
+
 let persons = [
   { 
     'name': 'Arto Hellas', 
@@ -51,6 +55,12 @@ app.get(`${personsEndpoint}/:id`, (req, res) => {
   }
   res.status(404).end();
 });
+
+app.post(personsEndpoint, (req, res) => {
+  const person = {...req.body, id: randomId()}
+  persons.push(person);
+  res.json(person);
+})
 
 app.delete(`${personsEndpoint}/:id`, (req, res) => {
   const personId = +req.params.id;

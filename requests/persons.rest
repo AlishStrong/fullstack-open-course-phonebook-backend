@@ -14,5 +14,14 @@ GET {{personUrl}}/string
 ### because person not found
 GET {{personUrl}}/10
 
+### Add a person
+POST {{personUrl}}
+Content-Type: application/json
+
+{
+  "name": "Antti",
+  "number": "123456"
+}
+
 ### Delete a person by id
 DELETE {{personUrl}}/1
