@@ -41,6 +41,17 @@ app.get(personsEndpoint, (req, res) => {
   res.json(persons);
 });
 
+app.get(`${personsEndpoint}/:id`, (req, res) => {
+  const personId = +req.params.id;
+  if (!!personId) {
+    const person = persons.find(p => p.id === personId);
+    if (person) {
+      res.json(person);
+    }
+  }
+  res.status(404).end();
+});
+
 
 const PORT = 3001;
 app.listen(PORT, () => console.log(`Phonebook backend listens on port ${PORT}`));

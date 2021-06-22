@@ -1,0 +1,15 @@
+@personUrl = http://localhost:3001/api/persons
+
+### Get all people
+GET {{personUrl}}
+
+### Get a person by id: 200
+GET {{personUrl}}/1
+
+### Get a person by id: 404 
+### because parameter is not numeric
+GET {{personUrl}}/string
+
+### Get a person by id: 404 
+### because person not found
+GET {{personUrl}}/10
