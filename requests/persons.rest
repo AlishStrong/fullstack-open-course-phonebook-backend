@@ -14,14 +14,38 @@ GET {{personUrl}}/string
 ### because person not found
 GET {{personUrl}}/10
 
-### Add a person
+### Add a person: 200
+### 400 if person's name already exists
 POST {{personUrl}}
 Content-Type: application/json
 
 {
-  "name": "Antti",
+  "name": "Alan",
   "number": "123456"
 }
+
+### Add a person: 400
+### because number is missing
+POST {{personUrl}}
+Content-Type: application/json
+
+{
+  "name": "Alan"
+}
+
+### Add a person: 200
+### because name is missing
+POST {{personUrl}}
+Content-Type: application/json
+
+{
+  "number": "123456"
+}
+
+### Add a person: 200
+### because data is missing
+POST {{personUrl}}
+Content-Type: application/json
 
 ### Delete a person by id
 DELETE {{personUrl}}/1

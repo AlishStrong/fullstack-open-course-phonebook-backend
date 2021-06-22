@@ -5,6 +5,23 @@ app.use(express.json());
 
 const randomId = () => Math.random() * Math.random();
 
+const checkData = data => {
+  if (!data.name && !data.number) {
+    return { result: false, error: 'name and number are missing!'};
+  } else if (!data.name) {
+    return { result: false, error: 'name is missing!'};
+  } else if (!data.number) {
+    return { result: false, error: 'number is missing!'};
+  } else {
+    return { result: true };
+  }
+}
+
+const isNewPersonName = name => {
+  const exists = persons.find(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+  return exists ?  { result: false, error: 'name must be unique!'} : { result: true };
+};
+
 let persons = [
   { 
     'name': 'Arto Hellas', 
@@ -57,9 +74,19 @@ app.get(`${personsEndpoint}/:id`, (req, res) => {
 });
 
 app.post(personsEndpoint, (req, res) => {
-  const person = {...req.body, id: randomId()}
-  persons.push(person);
-  res.json(person);
+  const dataCheck = checkData(req.body);
+  if (dataCheck.result) {
+    const nameCheck = isNewPersonName(req.body.name);
+    if (nameCheck.result) {
+      const person = {...req.body, id: randomId()}
+      persons.push(person);
+      res.json(person);
+    } else {
+      return res.status(400).json({ error: nameCheck.error });
+    }
+  } else {
+    return res.status(400).json({ error: dataCheck.error });
+  }
 })
 
 app.delete(`${personsEndpoint}/:id`, (req, res) => {
