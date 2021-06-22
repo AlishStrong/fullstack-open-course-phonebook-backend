@@ -24,6 +24,17 @@ const persons = [
   }
 ];
 
+app.get('/info', (req, res) => {
+  const peopleNumber = persons.length;
+  const requestTime = new Date();
+  res.send(
+    '<div>' +
+      `<p>Phonebook has info for ${peopleNumber === 1 ? peopleNumber + ' person' : peopleNumber + ' people'}</p>` +
+      `<p>${requestTime}</p>` +
+    '</div>'
+  );
+});
+
 const personsEndpoint = '/api/persons';
 
 app.get(personsEndpoint, (req, res) => {
