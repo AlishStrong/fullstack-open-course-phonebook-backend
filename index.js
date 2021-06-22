@@ -1,26 +1,19 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 
 app.use(express.json());
 
-const randomId = () => Math.random() * Math.random();
-
-const checkData = data => {
-  if (!data.name && !data.number) {
-    return { result: false, error: 'name and number are missing!'};
-  } else if (!data.name) {
-    return { result: false, error: 'name is missing!'};
-  } else if (!data.number) {
-    return { result: false, error: 'number is missing!'};
-  } else {
-    return { result: true };
+morgan.token('req-body', function getId (req, res) {
+  if (req.method === 'POST') {
+    return JSON.stringify(req.body);
   }
-}
+  return ' ';
+})
 
-const isNewPersonName = name => {
-  const exists = persons.find(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-  return exists ?  { result: false, error: 'name must be unique!'} : { result: true };
-};
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :req-body'));
+
+const personsEndpoint = '/api/persons';
 
 let persons = [
   { 
@@ -45,6 +38,25 @@ let persons = [
   }
 ];
 
+const randomId = () => Math.random() * Math.random();
+
+const checkData = data => {
+  if (!data.name && !data.number) {
+    return { result: false, error: 'name and number are missing!'};
+  } else if (!data.name) {
+    return { result: false, error: 'name is missing!'};
+  } else if (!data.number) {
+    return { result: false, error: 'number is missing!'};
+  } else {
+    return { result: true };
+  }
+}
+
+const isNewPersonName = name => {
+  const exists = persons.find(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+  return exists ?  { result: false, error: 'name must be unique!'} : { result: true };
+};
+
 app.get('/info', (req, res) => {
   const peopleNumber = persons.length;
   const requestTime = new Date();
@@ -55,8 +67,6 @@ app.get('/info', (req, res) => {
     '</div>'
   );
 });
-
-const personsEndpoint = '/api/persons';
 
 app.get(personsEndpoint, (req, res) => {
   res.json(persons);
@@ -78,7 +88,7 @@ app.post(personsEndpoint, (req, res) => {
   if (dataCheck.result) {
     const nameCheck = isNewPersonName(req.body.name);
     if (nameCheck.result) {
-      const person = {...req.body, id: randomId()}
+      const person = {...req.body, id: randomId()};
       persons.push(person);
       res.json(person);
     } else {
@@ -87,7 +97,7 @@ app.post(personsEndpoint, (req, res) => {
   } else {
     return res.status(400).json({ error: dataCheck.error });
   }
-})
+});
 
 app.delete(`${personsEndpoint}/:id`, (req, res) => {
   const personId = +req.params.id;
