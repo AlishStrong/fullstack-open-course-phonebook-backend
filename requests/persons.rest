@@ -14,14 +14,23 @@ GET {{personUrl}}/string
 ### because person not found
 GET {{personUrl}}/10
 
+### Update person
+PUT {{personUrl}}/60d32a446d50705af4460e98
+Content-Type: application/json
+
+{
+  "name": "Alan",
+  "number": "234-1276"
+}
+
 ### Add a person: 200
 ### 400 if person's name already exists
 POST {{personUrl}}
 Content-Type: application/json
 
 {
-  "name": "Alan",
-  "number": "123456"
+  "name": "Erkki",
+  "number": "123456789"
 }
 
 ### Add a person: 400

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
-const Person = require('./models/person');
+const personService = require('./models/personService');
 const app = express();
 
 app.use(express.static('build'))
@@ -41,77 +41,45 @@ let persons = [
   }
 ];
 
-const randomId = () => Math.random() * Math.random();
-
-const checkData = data => {
-  if (!data.name && !data.number) {
-    return { result: false, error: 'name and number are missing!'};
-  } else if (!data.name) {
-    return { result: false, error: 'name is missing!'};
-  } else if (!data.number) {
-    return { result: false, error: 'number is missing!'};
-  } else {
-    return { result: true };
-  }
-}
-
-const isNewPersonName = name => {
-  const exists = persons.find(p => p.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-  return exists ?  { result: false, error: 'name must be unique!'} : { result: true };
-};
-
 app.get('/info', (req, res) => {
-  const peopleNumber = persons.length;
-  const requestTime = new Date();
-  res.send(
-    '<div>' +
-      `<p>Phonebook has info for ${peopleNumber === 1 ? peopleNumber + ' person' : peopleNumber + ' people'}</p>` +
-      `<p>${requestTime}</p>` +
-    '</div>'
-  );
+  personService.getAllPersons()
+    .then(persons => {
+      const peopleNumber = persons.length;
+      const requestTime = new Date();
+      res.send(
+        '<div>' +
+          `<p>Phonebook has info for ${peopleNumber === 1 ? peopleNumber + ' person' : peopleNumber + ' people'}</p>` +
+          `<p>${requestTime}</p>` +
+        '</div>'
+      );
+    });
 });
 
 app.get(personsEndpoint, (req, res) => {
-  Person.find({})
+  personService.getAllPersons()
     .then(persons => res.json(persons));
 });
 
 app.get(`${personsEndpoint}/:id`, (req, res) => {
-  Person.findById(req.params.id)
+  personService.getPersonById(req.params.id)
     .then(person => person ? res.json(person) : res.status(404).end())
-    .catch(error => {
-      console.error(error);
-      res.status(404).end();
-    });
+    .catch(_ => res.status(404).end());
 });
 
 app.put(`${personsEndpoint}/:id`, (req, res) => {
-  const personId = +req.params.id;
-  if (!!personId) {
-    let person = persons.find(p => p.id === personId);
-    if (person) {
-      person = {...req.body};
-      persons = persons.map(p => p.id === person.id ? person : p);
-      res.json(person);
-    }
-  }
-  res.status(404).end();
+  personService.updatePerson(req.params.id, req.body.number)
+    .then(updatedPerson => updatedPerson ? res.json(updatedPerson) : res.status(404).end());
 });
 
 app.post(personsEndpoint, (req, res) => {
-  const dataCheck = checkData(req.body);
-  if (dataCheck.result) {
-    const nameCheck = isNewPersonName(req.body.name);
-    if (nameCheck.result) {
-      const person = {...req.body, id: randomId()};
-      persons.push(person);
-      res.json(person);
-    } else {
-      return res.status(400).json({ error: nameCheck.error });
-    }
-  } else {
-    return res.status(400).json({ error: dataCheck.error });
-  }
+  personService.addPerson(req.body)
+    .then(result => {
+      if (result.error) {
+        res.status(400).json(result);
+      } else {
+        res.json(result);
+      }
+    });
 });
 
 app.delete(`${personsEndpoint}/:id`, (req, res) => {
