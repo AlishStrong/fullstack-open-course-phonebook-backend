@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/AlishStrong/fullstack-open-course-phonebook-backend#readme",
   "dependencies": {
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "mongoose": "^5.12.14",
     "morgan": "^1.10.0"

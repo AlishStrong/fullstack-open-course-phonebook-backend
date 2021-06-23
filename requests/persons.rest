@@ -4,7 +4,7 @@
 GET {{personUrl}}
 
 ### Get a person by id: 200
-GET {{personUrl}}/1
+GET {{personUrl}}/60d23bb46b8e012ffc5b0123
 
 ### Get a person by id: 404 
 ### because parameter is not numeric

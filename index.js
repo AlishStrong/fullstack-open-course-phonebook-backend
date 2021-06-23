@@ -1,5 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+const Person = require('./models/person');
 const app = express();
 
 app.use(express.static('build'))
@@ -70,18 +72,17 @@ app.get('/info', (req, res) => {
 });
 
 app.get(personsEndpoint, (req, res) => {
-  res.json(persons);
+  Person.find({})
+    .then(persons => res.json(persons));
 });
 
 app.get(`${personsEndpoint}/:id`, (req, res) => {
-  const personId = +req.params.id;
-  if (!!personId) {
-    const person = persons.find(p => p.id === personId);
-    if (person) {
-      res.json(person);
-    }
-  }
-  res.status(404).end();
+  Person.findById(req.params.id)
+    .then(person => person ? res.json(person) : res.status(404).end())
+    .catch(error => {
+      console.error(error);
+      res.status(404).end();
+    });
 });
 
 app.put(`${personsEndpoint}/:id`, (req, res) => {
@@ -119,5 +120,5 @@ app.delete(`${personsEndpoint}/:id`, (req, res) => {
   res.status(204).end();
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Phonebook backend listens on port ${PORT}`));
