@@ -44,6 +44,8 @@ const addPerson = person => {
     });
 };
 
+const deletePerson = personId => Person.findByIdAndRemove(personId);
+
 const checkPersonData = person => {
   return new Promise((resolve, reject) => {
     if (!person.name && !person.number) {
@@ -58,4 +60,4 @@ const checkPersonData = person => {
   });
 };
 
-module.exports = { getAllPersons, getPersonById, updatePerson, addPerson };
+module.exports = { getAllPersons, getPersonById, updatePerson, addPerson, deletePerson };

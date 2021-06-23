@@ -63,7 +63,7 @@ app.get(personsEndpoint, (req, res) => {
 app.get(`${personsEndpoint}/:id`, (req, res) => {
   personService.getPersonById(req.params.id)
     .then(person => person ? res.json(person) : res.status(404).end())
-    .catch(_ => res.status(404).end());
+    .catch(_ => res.status(500).end());
 });
 
 app.put(`${personsEndpoint}/:id`, (req, res) => {
@@ -83,9 +83,8 @@ app.post(personsEndpoint, (req, res) => {
 });
 
 app.delete(`${personsEndpoint}/:id`, (req, res) => {
-  const personId = +req.params.id;
-  persons = persons.filter(p => p.id !== personId);
-  res.status(204).end();
+  personService.deletePerson(req.params.id)
+    .then(_ => res.status(204).end());
 });
 
 const PORT = process.env.PORT;
