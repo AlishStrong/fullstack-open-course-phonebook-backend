@@ -8,9 +8,6 @@ app.use(express.static('build'))
 app.use(express.json());
 
 const errorHandler = (error, request, response, next) => {
-  console.error('INDEXJS: ', error.message);
-  console.error('INDEXJS ERROR.NAME: ', error.name);
-
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   }

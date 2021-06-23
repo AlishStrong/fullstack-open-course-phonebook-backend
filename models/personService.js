@@ -36,7 +36,12 @@ const addPerson = person => {
     name: person.name,
     number: person.number
   });
-  return newPerson.save();
+  
+  return newPerson.save()
+    .catch(error => {
+      console.error(error);
+      throw error;
+    });
 };
 
 const deletePerson = personId => Person.findByIdAndRemove(personId)
