@@ -7,41 +7,34 @@ const app = express();
 app.use(express.static('build'))
 app.use(express.json());
 
+const errorHandler = (error, request, response, next) => {
+  console.error('Index.js', error.message);
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  if(error.message.indexOf('was not found') !== -1) {
+    return response.status(400).end();
+  }
+
+  response.status(500).end();
+  next(error);
+};
+
 morgan.token('req-body', function getId (req, res) {
   if (req.method === 'POST') {
     return JSON.stringify(req.body);
   }
   return ' ';
-})
+});
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :req-body'));
 
 const personsEndpoint = '/api/persons';
 
-let persons = [
-  { 
-    'name': 'Arto Hellas', 
-    'number': '040-123456',
-    'id': 1
-  },
-  { 
-    'name': 'Ada Lovelace', 
-    'number': '39-44-5323523',
-    'id': 2
-  },
-  { 
-    'name': 'Dan Abramov', 
-    'number': '12-43-234345',
-    'id': 3
-  },
-  { 
-    'name': 'Mary Poppendieck', 
-    'number': '39-23-6423122',
-    'id': 4
-  }
-];
-
-app.get('/info', (req, res) => {
+// get general data about people in DB
+app.get('/info', (req, res, next) => {
   personService.getAllPersons()
     .then(persons => {
       const peopleNumber = persons.length;
@@ -52,26 +45,34 @@ app.get('/info', (req, res) => {
           `<p>${requestTime}</p>` +
         '</div>'
       );
-    });
+    })
+    .catch(error => next(error));
 });
 
-app.get(personsEndpoint, (req, res) => {
+// get all people from DB
+app.get(personsEndpoint, (req, res, next) => {
   personService.getAllPersons()
-    .then(persons => res.json(persons));
+    .then(persons => res.json(persons))
+    .catch(error => next(error));
 });
 
-app.get(`${personsEndpoint}/:id`, (req, res) => {
+// get a person by provided id
+app.get(`${personsEndpoint}/:id`, (req, res, next) => {
   personService.getPersonById(req.params.id)
     .then(person => person ? res.json(person) : res.status(404).end())
-    .catch(_ => res.status(500).end());
+    .catch(error => next(error));
 });
 
-app.put(`${personsEndpoint}/:id`, (req, res) => {
+// update a person by provided id
+app.put(`${personsEndpoint}/:id`, (req, res, next) => {
   personService.updatePerson(req.params.id, req.body.number)
-    .then(updatedPerson => updatedPerson ? res.json(updatedPerson) : res.status(404).end());
+    .then(updatedPerson => updatedPerson ? res.json(updatedPerson) : res.status(404).end())
+    .catch(error => next(error));
 });
 
-app.post(personsEndpoint, (req, res) => {
+// create a new person
+// if provided name exists and number differs, then update the person
+app.post(personsEndpoint, (req, res, next) => {
   personService.addPerson(req.body)
     .then(result => {
       if (result.error) {
@@ -79,13 +80,24 @@ app.post(personsEndpoint, (req, res) => {
       } else {
         res.json(result);
       }
-    });
+    })
+    .catch(error => next(error));
 });
 
-app.delete(`${personsEndpoint}/:id`, (req, res) => {
+// delete a person by provided id
+app.delete(`${personsEndpoint}/:id`, (req, res, next) => {
   personService.deletePerson(req.params.id)
-    .then(_ => res.status(204).end());
+    .then(_ => res.status(204).end())
+    .catch(error => next(error));
 });
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+};
+
+app.use(unknownEndpoint);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Phonebook backend listens on port ${PORT}`));

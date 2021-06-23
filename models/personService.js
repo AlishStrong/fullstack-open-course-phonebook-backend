@@ -1,8 +1,16 @@
 const Person = require('./person');
 
-const getAllPersons = () => Person.find({}).catch(console.error);
+const getAllPersons = () => Person.find({})
+  .catch(error => {
+    console.error(error);
+    throw error;
+  });
 
-const getPersonById = id => Person.findById(id).catch(console.error);
+const getPersonById = id => Person.findById(id)
+  .catch(error => {
+    console.error(error);
+    throw error;
+  });
 
 const updatePerson = (personId, newNumber) => {
   return getPersonById(personId)
@@ -17,7 +25,10 @@ const updatePerson = (personId, newNumber) => {
       foundPerson.number = newNumber;
       return foundPerson.save();
     })
-    .catch(console.error);
+    .catch(error => {
+      console.error(error);
+      throw error;
+    });
 };
 
 const addPerson = person => {
@@ -40,11 +51,15 @@ const addPerson = person => {
     })
     .catch(error => {
       console.log(error);
-      return error;
+      throw error;
     });
 };
 
-const deletePerson = personId => Person.findByIdAndRemove(personId);
+const deletePerson = personId => Person.findByIdAndRemove(personId)
+  .catch(error => {
+    console.error(error);
+    throw error;
+  });
 
 const checkPersonData = person => {
   return new Promise((resolve, reject) => {
