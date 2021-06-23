@@ -8,14 +8,19 @@ app.use(express.static('build'))
 app.use(express.json());
 
 const errorHandler = (error, request, response, next) => {
-  console.error('Index.js', error.message);
+  console.error('INDEXJS: ', error.message);
+  console.error('INDEXJS ERROR.NAME: ', error.name);
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   }
 
-  if(error.message.indexOf('was not found') !== -1) {
+  if (error.message.indexOf('was not found') !== -1) {
     return response.status(400).end();
+  }
+
+  if (error.name === 'ValidationError') {
+    return response.status(400).send({ error: error.message });
   }
 
   response.status(500).end();
@@ -75,11 +80,11 @@ app.put(`${personsEndpoint}/:id`, (req, res, next) => {
 app.post(personsEndpoint, (req, res, next) => {
   personService.addPerson(req.body)
     .then(result => {
-      if (result.error) {
-        res.status(400).json(result);
-      } else {
+      // if (result.error) {
+      //   res.status(400).json(result);
+      // } else {
         res.json(result);
-      }
+      // }
     })
     .catch(error => next(error));
 });

@@ -32,27 +32,11 @@ const updatePerson = (personId, newNumber) => {
 };
 
 const addPerson = person => {
-  return checkPersonData(person)
-    .then(_ => Person.findOne({ name: person.name }))
-    .then(foundPerson => {
-      if (foundPerson) {
-        if (String(foundPerson.number) === String(person.number)) {
-          return { error: `Person ${person.name} with number ${person.number} already exists!`};
-        } else {
-          return updatePerson(foundPerson._id, person.number);
-        }
-      } else {
-        const newPerson = new Person({
-          name: person.name,
-          number: person.number
-        });
-        return newPerson.save();
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      throw error;
-    });
+  const newPerson = new Person({
+    name: person.name,
+    number: person.number
+  });
+  return newPerson.save();
 };
 
 const deletePerson = personId => Person.findByIdAndRemove(personId)
@@ -60,19 +44,5 @@ const deletePerson = personId => Person.findByIdAndRemove(personId)
     console.error(error);
     throw error;
   });
-
-const checkPersonData = person => {
-  return new Promise((resolve, reject) => {
-    if (!person.name && !person.number) {
-      reject({ error: 'name and number are missing!' });
-    } else if (!person.name) {
-      reject({ error: 'name is missing!' });
-    } else if (!person.number) {
-      reject({ error: 'number is missing!' });
-    } else {
-      resolve();
-    }
-  });
-};
 
 module.exports = { getAllPersons, getPersonById, updatePerson, addPerson, deletePerson };
